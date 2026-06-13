@@ -1,2 +1,2 @@
 # Sistema-Gestion-Ambiental-Sersae
-SIstema para la gestion ambienta de proyectos, modelo de negocio con autorizaciones local.strategy.js github.strategy.js
+Sistema para la gestion ambiental de proyectos, modelo de negocio con autorizaciones local.strategy.js github.strategy.js
