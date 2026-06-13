@@ -1,0 +1,38 @@
+{
+  "name": "sistema-gestion-ambiental-sersae",
+  "version": "1.0.0",
+  "description": "Sistema para la gestion ambiental de proyectos, modelo de negocio con autorizaciones local.strategy.js github.strategy.js",
+  "main": "index.js",
+  "scripts": {
+    "start": "node app.js",
+    "dev": "nodemon app.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zanti82/Sistema-Gestion-Ambiental-Sersae.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/zanti82/Sistema-Gestion-Ambiental-Sersae/issues"
+  },
+  "homepage": "https://github.com/zanti82/Sistema-Gestion-Ambiental-Sersae#readme",
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "connect-mongo": "^6.0.0",
+    "cookie-parser": "^1.4.7",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "express-session": "^1.19.0",
+    "jsonwebtoken": "^9.0.3",
+    "mongoose": "^9.7.0",
+    "passport": "^0.7.0",
+    "passport-github2": "^0.1.12",
+    "passport-local": "^1.0.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.14"
+  }
+}
