@@ -57,7 +57,7 @@ proyectoSchema.pre('save', async function(next) {
 
     // Si el proyecto ya tiene código no hacemos nada
     if (this.codigo) {
-        return next();
+        return;
     }
 
     // Contamos todos los proyectos que existen
@@ -69,7 +69,7 @@ proyectoSchema.pre('save', async function(next) {
     // Armamos el código final
     this.codigo = 'PROY-' + numero;
 
-    next();
+    
 });
 
 const Proyecto = mongoose.model('Proyecto', proyectoSchema);

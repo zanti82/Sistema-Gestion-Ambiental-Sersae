@@ -88,7 +88,7 @@ permisoSchema.pre('save', function(next) {
         this.estado = 'vigente';
     }
 
-    next();
+    
 });
 
 const Permiso = mongoose.model('Permiso', permisoSchema);
