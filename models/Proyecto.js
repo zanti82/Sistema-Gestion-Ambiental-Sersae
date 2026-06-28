@@ -67,7 +67,7 @@ proyectoSchema.pre('save', async function(next) {
     const numero = String(cantidad + 1).padStart(4, '0');
 
     // Armamos el código final
-    this.codigo = 'PROY-' + numero;
+    this.codigo = 'GR-' + numero;
 
     
 });
