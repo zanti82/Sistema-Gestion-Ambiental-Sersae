@@ -15,7 +15,7 @@ async function crear(req, res) {
         const tipoProyecto = req.body.tipoProyecto;
         const fechaInicio = req.body.fechaInicio;
         const fechaFin = req.body.fechaFin;
-        const clienteId = req.body.clienteId;
+        const servicioId = req.body.servicioId;
 
         // Validaciones obligatorias
         if (nombre === undefined || nombre === '') {
@@ -26,24 +26,21 @@ async function crear(req, res) {
             return res.status(400).json({ mensaje: 'La fecha de inicio es obligatoria' });
         }
 
-        if (clienteId === undefined || clienteId === '') {
-            return res.status(400).json({ mensaje: 'El cliente es obligatorio' });
+        if (servicioId === undefined || servicioId === '') {
+            return res.status(400).json({ mensaje: 'El servicio es obligatorio' });
         }
 
-        console.log(clienteId);
+        // Verificamos que el servicio exista
+        const servicioExistente = await Servicio.findById(servicioId);
 
-        // Verificamos que el cliente exista y esté activo
-        const clienteExistente = await Cliente.findById(clienteId);
-
-        if (clienteExistente === null) {
-            return res.status(404).json({ mensaje: 'Cliente no encontrado' });
+        if (servicioExistente === null) {
+            return res.status(404).json({ mensaje: 'Servicio no encontrado' });
         }
 
-        if (clienteExistente.activo === false) {
-            return res.status(404).json({ mensaje: 'Cliente inactivo' });
+         // Verificamos que el servicio sea de tipo tramite
+         if (servicioExistente.tipo !== 'tramite') {
+            return res.status(400).json({ mensaje: 'Solo los servicios de tipo trámite pueden tener proyectos' });
         }
-
-        console.log();
 
         // El código se genera automáticamente con el hook pre-save
         const proyectoNuevo = new Proyecto({
@@ -52,7 +49,7 @@ async function crear(req, res) {
             tipoProyecto: tipoProyecto,
             fechaInicio: fechaInicio,
             fechaFin: fechaFin,
-            cliente: clienteId,
+            servicio: servicioId,
             creadoPor: req.usuario.userId
         });
 

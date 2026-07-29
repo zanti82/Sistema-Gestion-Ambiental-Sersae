@@ -35,11 +35,11 @@ const proyectoSchema = new mongoose.Schema(
             type: Date,
             default: null
         },
-        cliente: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'Cliente',
-            required: true
-        },
+        servicio: { 
+            type: ObjectId, 
+            ref: 'Servicio',
+            required: true },
+
         creadoPor: {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'User',
