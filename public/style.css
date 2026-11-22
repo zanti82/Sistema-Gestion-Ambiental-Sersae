@@ -491,6 +491,10 @@ tbody tr:hover {
     background-color: #E3F2FD;
     color: #1565C0;
 }
+.badge-neutro {
+    background-color: #ECEFF1;
+    color: #546E7A;
+}
 
 /* =====================
    FORMULARIOS

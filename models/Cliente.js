@@ -13,26 +13,38 @@ const clienteSchema = new mongoose.Schema(
             unique: true,
             trim: true
         },
+        nombreCompleto: {
+            type: String,
+            trim: true,
+            default: null
+        },
         email: {
             type: String,
             required: true,
             trim: true,
             lowercase: true
         },
+        email2: {
+            type: String,
+            trim: true,
+            lowercase: true,
+            default: null
+        },
         telefono: {
             type: String,
             trim: true,
             default: null
         },
-        direccion: {
+        telefono2: {
             type: String,
             trim: true,
             default: null
         },
-        sector: {
+        
+        estatus: {
             type: String,
-            enum: ['mineria', 'agricultura', 'industria', 'construccion', 'energia', 'otro'],
-            default: 'otro'
+            enum: ['potencial', 'consolidado', 'inactivo'],
+            default: 'potencial'
         },
         activo: {
             type: Boolean,

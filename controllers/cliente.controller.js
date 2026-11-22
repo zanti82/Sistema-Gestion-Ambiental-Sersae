@@ -9,41 +9,49 @@ async function crear(req, res) {
 
     try {
 
+        // Campos obligatorios
         const razonSocial = req.body.razonSocial;
         const nit = req.body.nit;
         const email = req.body.email;
-        const telefono = req.body.telefono;
-        const direccion = req.body.direccion;
-        const sector = req.body.sector;
 
-        // Validaciones obligatorias
+        // Campos opcionales: si no vienen, Mongoose usa el default (null)
+        const nombreCompleto = req.body.nombreCompleto;
+        const email2 = req.body.email2;
+        const telefono = req.body.telefono;
+        const telefono2 = req.body.telefono2;
+        const estatus = req.body.estatus;
+
+        
+        // Validaciones de los obligatorios
         if (razonSocial === undefined || razonSocial === '') {
             return res.status(400).json({ mensaje: 'La razón social es obligatoria' });
         }
 
         if (nit === undefined || nit === '') {
-            return res.status(400).json({ mensaje: 'El nit es obligatorio' });
+            return res.status(400).json({ mensaje: 'El NIT es obligatorio' });
         }
 
         if (email === undefined || email === '') {
             return res.status(400).json({ mensaje: 'El email es obligatorio' });
         }
 
-        // Verificamos que el nit no exista
-        const clienteExistente = await Cliente.findOne({ nit : nit });
+        // El NIT no se puede repetir
+        const clienteExistente = await Cliente.findOne({ nit: nit });
 
         if (clienteExistente !== null) {
             return res.status(400).json({ mensaje: 'Ya existe un cliente con ese NIT' });
         }
 
-        // req.usuario lo pone el middleware verificarToken
+        // Armamos el documento con todos los campos
         const clienteNuevo = new Cliente({
             razonSocial: razonSocial,
             nit: nit,
             email: email,
+            nombreCompleto: nombreCompleto,
+            email2: email2,
             telefono: telefono,
-            direccion: direccion,
-            sector: sector,
+            telefono2: telefono2,
+            estatus: estatus,
             creadoPor: req.usuario.userId
         });
 
@@ -126,36 +134,25 @@ async function editar(req, res) {
 
         const cliente = await Cliente.findById(id);
 
+        // Si no existe o está desactivado, respondemos 404
         if (cliente === null) {
             return res.status(404).json({ mensaje: 'Cliente no encontrado' });
         }
 
         if (cliente.activo === false) {
-            return res.status(404).json({ mensaje: 'Cliente incativo' });
+            return res.status(404).json({ mensaje: 'Cliente no encontrado' });
         }
 
-        // Solo actualizamos los campos que vienen en el body
-        // Si no vienen, dejamos el valor actual
-        if (req.body.razonSocial !== undefined) {
-            cliente.razonSocial = req.body.razonSocial;
-        }
+        // Cada campo se actualiza solo si llegó en el body
+        if (req.body.razonSocial !== undefined) { cliente.razonSocial = req.body.razonSocial; }
+        if (req.body.nombreCompleto !== undefined) { cliente.nombreCompleto = req.body.nombreCompleto; }
+        if (req.body.email !== undefined) { cliente.email = req.body.email; }
+        if (req.body.email2 !== undefined) { cliente.email2 = req.body.email2; }
+        if (req.body.telefono !== undefined) { cliente.telefono = req.body.telefono; }
+        if (req.body.telefono2 !== undefined) { cliente.telefono2 = req.body.telefono2; }
+        if (req.body.estatus !== undefined) { cliente.estatus = req.body.estatus; }
 
-        if (req.body.email !== undefined) {
-            cliente.email = req.body.email;
-        }
-
-        if (req.body.telefono !== undefined) {
-            cliente.telefono = req.body.telefono;
-        }
-
-        if (req.body.direccion !== undefined) {
-            cliente.direccion = req.body.direccion;
-        }
-
-        if (req.body.sector !== undefined) {
-            cliente.sector = req.body.sector;
-        }
-
+       
         const clienteActualizado = await cliente.save();
 
         return res.status(200).json({

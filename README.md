@@ -1,410 +1,289 @@
-# Sistema-Gestion-Ambiental-Sersae
-Sistema para la gestion ambiental de proyectos, modelo de negocio con autorizaciones local.strategy.js github.strategy.js
+# 🌿 SERSAE — Sistema de Gestión Ambiental
 
-Un sistema donde Asistentes cargan clientes con sus proyectos ambientales, cada proyecto tiene permisos con fecha de vencimiento, y el sistema avisa automáticamente cuando un permiso está por vencer.
-La idea del desarrollo es mostrar coomo funciona una sistema de gestion usando las autorizaciones aprendidads en el curos back2 de coderhouse.
+> Plataforma web para gestionar clientes, sedes, servicios y trámites ambientales, con alertas automáticas de vencimientos y plazos.
 
-# Roles
+![Node.js](https://img.shields.io/badge/Node.js-18+-339933?style=flat&logo=node.js&logoColor=white)
+![Express](https://img.shields.io/badge/Express-4.x-000000?style=flat&logo=express&logoColor=white)
+![MongoDB](https://img.shields.io/badge/MongoDB-7.x-47A248?style=flat&logo=mongodb&logoColor=white)
+![JWT](https://img.shields.io/badge/JWT-Auth-000000?style=flat&logo=jsonwebtokens&logoColor=white)
 
-Rol         Puede hacer
-admin       Todo: usuarios, clientes, proyectos, permisos
-asistente    Crear/editar clientes, proyectos y permisos
+---
 
-# Modelos de base de datos No relacionales con MongoDB
+## ¿Qué hace?
 
-User         → quien usa el sistema (admin / asistente)
-Cliente      → empresa o persona con proyectos ambientales
-Proyecto     → proyecto ambiental de un cliente
-Permiso      → permiso con fecha de vencimiento ligado a un proyecto
+- Registra **clientes** y sus **sedes** (cada sede con su ubicación y autoridad ambiental).
+- Registra los **servicios** que se venden por sede: diagnóstico, trámite, sostenibilidad y acción climática.
+- Para los **trámites**, usa un **catálogo de tipos** (vertimientos, concesión de aguas, ocupación de cauce, requerimiento, RUA) al que se pueden agregar tipos nuevos sin tocar el código.
+- Controla **permisos** (con fecha de vencimiento) y **plazos** (requerimientos y RUA, con fecha límite).
+- Muestra **alertas** de lo vencido y lo próximo a vencer en el dashboard.
+- Controla el acceso con **roles** (admin y asistente).
 
-User  ──────► (crea/gestiona)
-Cliente  1 ───► N  Proyecto
-Proyecto 1 ───► N  Permiso  ← tiene fechaVencimiento
+---
 
-# Arquitectura del proyecto
+## Modelo de datos
 
-sersaeApi/
-│
+```
+Cliente 1 ──► N Sede 1 ──► N Servicio
+                              ├─ diagnostico
+                              ├─ sostenibilidad
+                              ├─ accion_climatica
+                              └─ tramite ──► TipoTramite (catálogo)
+                                    └─ 1 ──► N Permiso   (permiso con vencimiento o plazo con fecha límite)
+```
+
+| Colección | Campos principales |
+|---|---|
+| `User` | nombre, email, password (hash), rol, githubId, activo |
+| `Cliente` | razonSocial, nit, nombreCompleto, email, email2, telefono, telefono2, estatus, activo |
+| `Sede` | nombre, codigo (`SD-001`, automático), categoria, departamento, municipio, vereda, autoridadAmbiental, coordenadas (x, y, z), cliente, activo |
+| `Servicio` | tipo, nombre, descripcion, linkPropuesta, precio, descuento, acuerdoPago, estadoPropuesta, motivoRechazo, estadoEjecucion, sede, tipoTramite, activo |
+| `TipoTramite` | nombre, tipoFecha (`vencimiento` o `plazo`), activo |
+| `Permiso` | nombre, numero, fechaEmision, fechaVencimiento, estado, diasAlerta, observaciones, servicio |
+| `sessions` | creada por `connect-mongo` (TTL de 1 hora) |
+
+### Reglas del modelo
+
+- **Cliente → Sede:** los datos de ubicación viven en la sede, porque un cliente puede tener varias y cada una puede depender de una autoridad ambiental distinta.
+- **Catálogo de trámites:** `tipoFecha` define cómo se lee el registro. Con `vencimiento` el permiso exige número y fecha de emisión; con `plazo` (requerimiento, RUA) solo se pide la fecha límite. Ambos usan el mismo motor de alertas.
+- **Estado calculado:** el estado de un permiso se guarda al crearlo, pero **puede quedar viejo**. La verdad es el campo virtual `estadoActual`, que se calcula con la fecha cada vez que se lee. Las alertas usan `estadoActual`. `renovado` es el único estado que se marca a mano.
+- **Total del servicio:** `precio - descuento` (el descuento es un monto en pesos). No se guarda, se calcula.
+- **Reglas condicionales:** `tipoTramite` es obligatorio solo si `tipo = tramite`. `motivoRechazo` solo se guarda si `estadoPropuesta = rechazada`. El backend las aplica aunque el formulario las oculte.
+- **Borrado:** clientes, sedes y servicios usan borrado lógico (`activo: false`). Una sede con servicios activos no se puede eliminar (responde `409`). Los permisos se eliminan de verdad.
+
+---
+
+## Stack
+
+| Capa | Tecnología |
+|---|---|
+| Servidor | Node.js + Express |
+| Base de datos | MongoDB + Mongoose |
+| Autenticación | Passport (Local + GitHub OAuth) |
+| Tokens | JWT (`jsonwebtoken`, expira en 1 h) |
+| Sesiones | `express-session` + `connect-mongo` |
+| Contraseñas | `bcryptjs` |
+| Frontend | HTML + CSS + JavaScript puro (sin frameworks) |
+
+---
+
+## Estructura
+
+```
+SISTEMA-GESTION-AMBIENTAL-SERSAE/
 ├── config/
-│   └── database.js
-│
+│   ├── database.js              → conexión a MongoDB
+│   └── session.js               → sesiones en MongoDB
 ├── models/
 │   ├── User.js
 │   ├── Cliente.js
-│   ├── Proyecto.js
+│   ├── Sede.js
+│   ├── Servicio.js
+│   ├── TipoTramite.js
 │   └── Permiso.js
-│
 ├── strategies/
-│   ├── local.strategy.js
-│   └── github.strategy.js
-│
-├── controllers/
+│   ├── local.strategy.js        → email + password
+│   └── github.strategy.js       → GitHub OAuth
+├── controllers/                 → una carpeta de lógica por entidad
 │   ├── auth.controller.js
 │   ├── cliente.controller.js
-│   ├── proyecto.controller.js
+│   ├── sede.controller.js
+│   ├── servicio.controller.js
+│   ├── tipoTramite.controller.js
 │   └── permiso.controller.js
-│
 ├── middlewares/
-│   ├── auth.middleware.js
-│   └── role.middleware.js
-│
-├── routes/
-│   ├── auth.routes.js
-│   ├── cliente.routes.js
-│   ├── proyecto.routes.js
-│   └── permiso.routes.js
-│
+│   └── auth.middleware.js       → verificarToken + verificarRol
+├── routes/                      → un archivo de rutas por entidad
+├── seeds/
+│   └── tiposTramite.seed.js     → carga los 5 tipos de trámite iniciales
 ├── public/
-│   ├── index.html        → login
-│   ├── dashboard.html    → panel principal
-│   ├── clientes.html     → lista de clientes
-│   └── css/
-│       └── style.css
-│
+│   ├── index.html
+│   ├── style.css
+│   └── scripts.js
 ├── .env.example
-├── .env
 └── app.js
+```
 
-# endpoints 
+---
 
-POST   /api/auth/register
-POST   /api/auth/login
-GET    /api/auth/logout
-GET    /api/session
+## Instalación local
 
-GET    /api/profile          ← JWT protegida
-GET    /api/admin            ← solo admin
+**Requisitos:** Node.js 18 o superior, MongoDB (local o Atlas) y una cuenta de GitHub para el login con GitHub.
 
-GET    /api/clientes
-POST   /api/clientes
-GET    /api/clientes/:id
+**1. Instalar dependencias**
 
-GET    /api/proyectos
-POST   /api/proyectos
-GET    /api/proyectos/:id
+```bash
+npm install
+```
 
-GET    /api/permisos
-POST   /api/permisos
-GET    /api/permisos/vencimientos   ← alertas de vencimiento
+**2. Revisar los scripts en `package.json`**
 
-# codigo
-
-npm init -y ---> para instalar el package.json
-
-npm install express mongoose dotenv bcryptjs jsonwebtoken passport passport-local passport-github2 express-session connect-mongo cookie-parser  ---> inatalamos todas la librerias del proyecto
-
-npm install --save-dev nodemon
-
-express             ---El servidor web. Como Spring MVC.
-mongoose            ---Habla con MongoDB. Como JPA/Hibernate.
-dotenv              ---Lee el archivo .env con las variables secretas
-bcryptjs            ---Encripta contraseñas. Nunca guardamos texto plano.
-jsonwebtoken        ---Crea y verifica los tokens JWT
-passport            ---El gestor de autenticación. Como Spring Security
-passport-local      ---Estrategia de usuario + contraseña
-passport-github2    ---Estrategia de login con GitHub
-express-session     ---Maneja sesiones en el servidor
-connect-mongo       ---Guarda las sesiones en MongoDB
-cookie-parser       ---Permite leer cookies en las requests
-nodemon             ---Reinicia el servidor solo cada vez que guardás un archivo. Solo se usa en desarrollo.
-
-# app.js
-
-Es el punto de entrada de toda la aplicación. Como el main() en Java. Aquí arranca el servidor, se conectan los middlewares y se registran las rutas.
-
-# .env
-Tiene los valores reales y secretos. Nunca se comparte
-
-# database mongo
-
-Monogo hace toda la conexion solo, no hay que crear database ni tablas.
-Antes de crear el modelo, Mongoose necesita un Schema. El Schema define la estructura del documento — qué campos tiene, de qué tipo son y qué reglas deben cumplir.
-
-Desarrollo  → MONGO_URI=mongodb://localhost:27017/sersaeDB
-Producción  → MONGO_URI=mongodb+srv://usuario:password@cluster.mongodb.net/sersaeDB
-
-Conexion exitosa: 
-Server running in port: 3000
-MongoDB conectado en: mongodb://localhost:27017/sesaeDB
-
-# roles y model user
-
-EN al base de datos definimos los elementos para autenticarnos, email, password, rol(para permisos), el githubID para el 
-uso de auntenticacion con la cuenta de github OAuth
-
-email: {
-    type: String,
-    required: true,
-    unique: true,
-    trim: true,
-    lowercase: true
-},
-password: {
-    type: String,
-    default: null
-},
-rol: {
-    type: String,
-    enum: ['admin', 'asistente'],
-    default: 'asistente'
-},
-githubId: {
-    type: String,
-    default: null
-},
-
-
-nombre      String          Nombre del usuario
-email       String unique   No pueden existir dos iguales
-password    String null     Puede ser null si entra por GitHub
-rol         enum            Solo acepta admin o asistente
-githubId    String null     Lo usamos cuando hagamos OAuth
-activo      Boolean         Para desactivar sin borrar
-
-timestamp: true     Mongo lo maneja automaticamente
-createdAt  →  fecha de creación
-updatedAt  →  fecha de última modificación
-
-# cliente
-
-Un Cliente es la empresa o persona que tiene proyectos ambientales. El asistente es quien los carga al sistema.
-
-creadoPor: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-    required: true
+```json
+"scripts": {
+    "start": "node app.js",
+    "dev": "nodemon app.js",
+    "seed": "node seeds/tiposTramite.seed.js"
 }
+```
 
-Esto referecnia un llave foranea de User, para saber quien la creo. 
+**3. Crear el `.env`** copiando `.env.example`:
 
-SQL                          MongoDB con Mongoose
-─────────────────────        ─────────────────────
-FOREIGN KEY (user_id)   →    type: ObjectId
-REFERENCES users(id)    →    ref: 'User'
+```env
+PORT=3000
+MONGO_URI=mongodb://localhost:27017/sersaeDB
+JWT_SECRET=una_cadena_larga_y_aleatoria
+SESSION_SECRET=otra_cadena_larga_y_aleatoria
+NODE_ENV=development
+GITHUB_CLIENT_ID=tu_client_id
+GITHUB_CLIENT_SECRET=tu_client_secret
+GITHUB_CALLBACK_URL=http://localhost:3000/api/auth/github/callback
+```
 
-# permisos
+**4. Configurar GitHub OAuth** en https://github.com/settings/developers → *New OAuth App*:
+- Homepage URL: `http://localhost:3000`
+- Callback URL: `http://localhost:3000/api/auth/github/callback`
 
-Son los permisos que se han inventariado y se neceista la alerta
+**5. Cargar los tipos de trámite iniciales** (es seguro ejecutarlo varias veces, no duplica):
 
- tipoPermiso: {
-    type: String,
-    enum: [
-        'licencia_ambiental',
-        'permiso_vertimiento',
-        'permiso_emision',
-        'concesion_agua',
-        'permiso_aprovechamiento',
-        'otro'
-    ],
-    default: 'otro'
-},
-fechaEmision: {
-    type: Date,
-    required: true
-},
-fechaVencimiento: {
-    type: Date,
-    required: true
-},
-estado: {
-    type: String,
-    enum: ['vigente', 'por_vencer', 'vencido', 'renovado'],
-    default: 'vigente'
-},
-diasAlerta: {
-    type: Number,
-    default: 30
-}
+```bash
+npm run seed
+```
 
+**6. Iniciar el servidor**
 
-# Passport Local Strategy
+```bash
+npm run dev
+```
 
-Passport es un middleware de autenticación para Node.js. Su trabajo es verificar la identidad del usuario.
-Funciona con estrategias. Cada estrategia es una forma diferente de autenticarse:
+**7. Abrir la aplicación** en `http://localhost:3000`. El frontend siempre debe abrirse desde esta dirección, no como archivo (`file://`), porque la cookie de sesión solo viaja en el mismo origen.
 
-passport-local    →  usuario y contraseña
-passport-github2  →  login con GitHub
-passport-google   →  login con Google
+---
 
-passport-local fujo:
+## Prueba rápida
 
-Usuario envía email + password
-        ↓
-Passport intercepta el request
-        ↓
-Ejecuta la Local Strategy
-        ↓
-Busca el User en MongoDB
-        ↓
-Compara el password con bcrypt
-        ↓
-Si es correcto  →  genera JWT  →  responde con token
-Si es incorrecto →  responde 401 No autorizado
+Primero crea un usuario administrador y entra desde la pantalla de login (o con Postman).
 
-El en local strategy hay que definir un username y un password. Por uso normal de desarrollo
-se una eamil como username y password como password.
+```
+POST /api/auth/register
+{ "nombre": "Admin", "email": "admin@sersae.com", "password": "Admin1234", "rol": "admin" }
 
-POST /api/v1/auth/login
-        ↓
-passport.authenticate('local')
-        ↓
-local.strategy.js se ejecuta
-        ↓
-User.findOne({ email })       →  ¿existe?
-        ↓
-bcrypt.compare(password, hash) →  ¿correcto?
-        ↓
-done(null, usuario)            →  continúa al controller
+POST /api/auth/login
+{ "email": "admin@sersae.com", "password": "Admin1234" }
+```
 
+En Postman usa el `token` de la respuesta con el encabezado `Authorization: Bearer TU_TOKEN`. El navegador usa la cookie `authToken` automáticamente.
 
-# auth.controller.js
+Después, en este orden:
 
-Los controllers son archivo que contiene la lógica de negocio de cada endpoint. Recibe el request, hace el trabajo y devuelve la response.
+```
+POST /api/clientes
+{ "razonSocial": "Los Alpes SAS", "nit": "900123456-1", "nombreCompleto": "Jhon Dario Correa",
+  "email": "contacto@losalpes.com", "telefono": "3001234567", "estatus": "consolidado" }
 
-Funciones del authCOntroller:
+POST /api/sedes
+{ "nombre": "Granja Los Alpes", "categoria": "porcicultor", "departamento": "Antioquia",
+  "municipio": "San Roque", "autoridadAmbiental": "Cornare", "clienteId": "ID_CLIENTE" }
 
-register  →  crear usuario nuevo
-login     →  verificar credenciales y generar JWT
-logout    →  limpiar cookie y sesión
-profile   →  devolver datos del usuario logueado
-session   →  devolver datos de la sesión activa
+POST /api/servicios
+{ "tipo": "tramite", "nombre": "Concesión de aguas", "precio": 2600000, "descuento": 0,
+  "estadoPropuesta": "aprobada", "estadoEjecucion": "en_curso",
+  "sedeId": "ID_SEDE", "tipoTramiteId": "ID_TIPO_TRAMITE" }
 
+POST /api/permisos
+{ "nombre": "Concesión de aguas superficiales", "numero": "RES-2026-001",
+  "fechaEmision": "2026-01-15", "fechaVencimiento": "2027-01-15",
+  "diasAlerta": 60, "servicioId": "ID_SERVICIO" }
 
-Manejo de csrf y proteccion de datos en la cookie
+GET /api/permisos/vencimientos
+```
 
-Luego de obteenr el jwt
- // Enviamos el token en una cookie httpOnly
-        // httpOnly: true  → JavaScript del navegador NO puede leerla
-        // sameSite: 'Lax' → protección contra CSRF
-        // secure          → solo HTTPS en producción
-        const esProduccion = process.env.NODE_ENV === 'production';
+Obtén `ID_TIPO_TRAMITE` con `GET /api/tipos-tramite`. Para probar las alertas, cambia `fechaVencimiento` a una fecha cercana o pasada.
 
-        res.cookie('authToken', token, {
-            httpOnly: true,
-            sameSite: 'Lax',
-            secure: esProduccion
-        });
+---
 
-El salt
+## API
 
-javascriptconst salt = await bcrypt.genSalt(10);
-El número 10 define cuántas veces bcrypt procesa el password:
-salt rounds: 10  →  1024 iteraciones   (recomendado para producción)
-salt rounds: 12  →  4096 iteraciones   (más seguro, más lento)
-salt rounds: 6   →  64 iteraciones     (muy rápido, poco seguro)
+Todas las rutas, salvo las de autenticación, requieren sesión (cookie o `Bearer`).
 
-ERRORES DEL JSONWBTOKEN
+**Autenticación**
 
-// jwt.verify lanza estos errores según el caso:
+| Método | Ruta | Acceso |
+|---|---|---|
+| POST | `/api/auth/register` | público |
+| POST | `/api/auth/login` | público |
+| POST | `/api/auth/logout` | limpia la cookie y destruye la sesión |
+| GET | `/api/auth/github` | inicia el login con GitHub |
+| GET | `/api/auth/github/callback` | retorno de GitHub |
+| GET | `/api/profile` | JWT |
+| GET | `/api/session` | JWT |
+| GET | `/api/admin` | JWT + rol admin |
 
-TokenExpiredError   →  el token existía pero ya expiró (pasó 1h)
-JsonWebTokenError   →  el token está malformado o la firma no coincide
-NotBeforeError      →  el token todavía no es válido (caso raro)
+**Recursos** (cada uno con `GET` lista, `POST`, `GET /:id`, `PUT /:id`, `DELETE /:id`)
 
-Los vamos a usar para los middlewares
+| Ruta | Filtros de la lista | Borrado |
+|---|---|---|
+| `/api/clientes` | — | lógico |
+| `/api/sedes` | `clienteId` | lógico; `409` si tiene servicios activos |
+| `/api/servicios` | `sedeId`, `tipo`, `estadoPropuesta`, `estadoEjecucion` | lógico |
+| `/api/permisos` | `servicioId`, `estado` (calculado) | definitivo |
 
-# middlewares para verificar y filtrar, como el filte de springboot
+**Otras rutas**
 
-Es una función que se ejecuta entre el request y el response. Como un filtro o interceptor.
-Request llega
-     ↓
-Middleware 1  →  ¿tiene token?
-     ↓
-Middleware 2  →  ¿tiene el rol correcto?
-     ↓
-Controller    →  ejecuta la lógica
-     ↓
-Response sale
+| Método | Ruta | Descripción |
+|---|---|---|
+| GET | `/api/permisos/vencimientos` | resumen y listas de vencidos y por vencer |
+| GET | `/api/tipos-tramite` | lista el catálogo (cualquier usuario con sesión) |
+| POST | `/api/tipos-tramite` | crea un tipo de trámite (solo admin) |
 
-auth.middleware.js  →  verifica que el JWT sea válido Y verifica que el usuario tenga el rol correcto
+Códigos usados: `400` datos inválidos, `401` sin sesión, `403` sin permiso de rol, `404` no encontrado, `409` conflicto con datos existentes.
 
+---
 
-Se hace la busqueda del token de dos maneras para evaular con html y postman
+## Seguridad
 
-Cookie      →  para el navegador (frontend HTML)
-Header      →  para Postman y aplicaciones externas
+- **Contraseñas** con bcrypt (10 rondas).
+- **JWT** con `{ userId, rol }`, expira en 1 hora.
+- **Cookie `authToken`:** `httpOnly`, `sameSite: Lax`, `secure` en producción y `maxAge` de 1 hora, igual que el token.
+- **El frontend no guarda el token.** Solo usa la cookie `httpOnly`, que JavaScript no puede leer. Al cargar, consulta `/api/profile` para saber si hay sesión. Si la sesión expira, vuelve al login con un aviso.
+- **XSS:** todo dato de la base que se escribe en el HTML pasa por `escaparHtml`.
+- **CSRF:** `SameSite=Lax` bloquea las peticiones `POST`, `PUT` y `DELETE` de otros sitios. Por eso el logout es `POST`.
+- **Sesiones** guardadas en MongoDB con vencimiento de 1 hora; el logout las destruye.
+- **Roles** verificados en el servidor (`verificarRol`), no en el frontend.
+- **Validación en el backend** de todas las reglas del negocio, aunque el formulario también las valide.
 
-La diferencia entre 401 y 403
+El token en el cuerpo de la respuesta de login se mantiene para poder usar la API desde Postman. El frontend lo ignora.
 
-401 Unauthorized  →  No sabemos quién sos. No hay token o es inválido
-403 Forbidden     →  Sabemos quién sos pero no tenés permiso
+---
 
-Sin token          →  401  (no sabemos quién sos)
+## Limitaciones conocidas
 
-Token de asistente
-intentando entrar
-a ruta de admin    →  403  (sabemos quién sos, pero no podés)
+Pendientes antes de poner la aplicación en producción:
 
-# routes
+1. **`/api/auth/register` es público y acepta el campo `rol`**, así que cualquiera podría crearse un administrador. Debe forzar `asistente` y dejar que solo un admin cree otros admins.
+2. El rol vive en el JWT: un cambio de rol se aplica en el siguiente login (máximo 1 hora).
+3. Sin límite de intentos en el login ni cabeceras de seguridad (`helmet`).
+4. Los errores se manejan en cada controller y devuelven `error.message`. Falta un manejador central de errores.
+5. Sin pruebas automáticas.
+6. Eliminar un cliente no valida si tiene sedes activas.
+7. Renovar un permiso solo lo marca como `renovado`; el permiso nuevo se crea a mano.
 
-Es el archivo que conecta una URL con un controller. No tiene lógica, solo define quién atiende cada endpoint.
+---
 
-Route           →   define URL + método HTTP + middlewares + controller
-Controller      →   tiene la lógica
-Middleware      →   filtro que se ejecuta antes del controller
+## Despliegue en un VPS
 
-POST  /api/v1/auth/register   →  público
-POST  /api/v1/auth/login      →  público
-GET   /api/v1/auth/logout     →  público
+```bash
+# Node.js 18+, PM2 y Nginx instalados
+git clone <repositorio> && cd <carpeta>
+npm install
+cp .env.example .env      # completar con valores de producción
+npm run seed
+pm2 start app.js --name sersae
+pm2 save && pm2 startup
+```
 
-GET   /api/v1/profile         →  protegido con JWT
-GET   /api/v1/session         →  protegido con JWT
-GET   /api/v1/admin           →  protegido con JWT + rol admin
+Para producción:
 
-# sesiones
-
-Una sesión es un espacio de almacenamiento en el servidor vinculado a un usuario específico. A diferencia del JWT que vive en el cliente, la sesión vive en el servidor.
-
-JWT                          Sesión
-─────────────────────        ─────────────────────
-Vive en el cliente           Vive en el servidor
-El cliente lo envía          El servidor lo busca
-en cada request              por el sessionId
-No se puede invalidar        Se puede destruir
-fácilmente                   en cualquier momento
-
-
-ttl: 60 * 60  →  3600 segundos  →  1 hora
-MongoDB borra automáticamente las sesiones vencidas.
-
-
-JWT      →  /profile, /admin, /clientes, /proyectos
-           cualquier ruta que necesite autenticación
-
-Sesión   →  /session
-           solo para saber si hay alguien conectado
-           y destruirla en el logout
-
-
-# GitHub OAuth
-
-OAuth es un protocolo que permite que un usuario se autentique usando una cuenta de terceros (GitHub, Google, etc.) sin compartir su contraseña con nuestra app.
-
-Sin OAuth                    Con OAuth
-─────────────────────        ─────────────────────
-Usuario crea cuenta          Usuario hace click
-en nuestra app               "Entrar con GitHub"
-recuerda otra contraseña          ↓
-                             GitHub verifica
-                             su identidad
-                                  ↓
-                             nos envía los datos
-                             del usuario
-
-
-1. Usuario hace click en "Login con GitHub"
-        ↓
-2. Nuestra app redirige a GitHub
-        ↓
-3. GitHub pregunta "¿Autorizás a SERSAE?"
-        ↓
-4. Usuario acepta
-        ↓
-5. GitHub nos manda un "code" secreto
-        ↓
-6. Nuestra app intercambia ese code por los datos del usuario
-        ↓
-7. Creamos o buscamos el usuario en nuestra BD
-        ↓
-8. Generamos JWT y redirigimos al dashboard
-
+- `NODE_ENV=production` y `MONGO_URI` de MongoDB Atlas.
+- Secretos largos y aleatorios para `JWT_SECRET` y `SESSION_SECRET`.
+- HTTPS con Nginx como proxy y certificado (Let's Encrypt). La cookie `secure` solo funciona con HTTPS.
+- Detrás de Nginx, agregar `app.set('trust proxy', 1);` en `app.js`, antes de las sesiones. Sin esto, `express-session` no envía la cookie de sesión.
+- Cambiar `GITHUB_CALLBACK_URL` y la callback de la app de GitHub al dominio real.

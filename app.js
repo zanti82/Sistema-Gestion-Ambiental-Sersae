@@ -9,9 +9,12 @@ const passport = require('./strategies/local.strategy');
 require('./strategies/github.strategy'); 
 const configurarSession = require('./config/session');
 const authRoutes = require('./routes/auth.routes');
-const clienteRoutes = require('./routes/cliente.routes');     // 👈 nuevo
-const proyectoRoutes = require('./routes/proyecto.routes');   // 👈 nuevo
+const clienteRoutes = require('./routes/cliente.routes');     
 const permisoRoutes = require('./routes/permiso.routes');  
+const servicioRoutes = require('./routes/servicio.routes'); 
+const sedeRoutes = require('./routes/sede.routes');
+const tipoTramiteRoutes = require('./routes/tipoTramite.routes');
+
 
 // Carga las variables del archivo .env
 //dotenv.config();
@@ -39,9 +42,13 @@ app.use(passport.initialize()); //inicia el la auntenticacion son passport usand
 // =====================
 app.use('/api/auth', authRoutes); //ruta sin veririfaciones PUBLICAS
 app.use('/api/', authRoutes); // todas las rutas que necesitan verificacino
-app.use('/api/clientes', clienteRoutes);     // 👈 nuevo
-app.use('/api/proyectos', proyectoRoutes);   // 👈 nuevo
-app.use('/api/permisos', permisoRoutes);     // 👈 nuevo
+app.use('/api/clientes', clienteRoutes);     
+app.use('/api/permisos', permisoRoutes);     
+app.use('/api/servicios', servicioRoutes); 
+app.use('/api/sedes', sedeRoutes);
+app.use('/api/tipos-tramite', tipoTramiteRoutes);
+
+
 
 
 //ruta prueba

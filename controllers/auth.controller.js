@@ -114,7 +114,8 @@ function login(req, res, next) {
         res.cookie('authToken', token, {
             httpOnly: true,
             sameSite: 'Lax',
-            secure: esProduccion
+            secure: esProduccion,
+            maxAge: 1000 * 60 * 60   // 1 hour, same as the JWT
         });
 
         //  Guardamos datos del usuario en la sesión
@@ -236,7 +237,8 @@ function githubCallback(req, res) {
     res.cookie('authToken', token, {
         httpOnly: true,
         sameSite: 'Lax',
-        secure: esProduccion
+        secure: esProduccion,
+        maxAge: 1000 * 60 * 60   // 1 hour, same as the JWT
     });
 
     // Guardamos en sesión
@@ -248,7 +250,7 @@ function githubCallback(req, res) {
     };
 
     // Redirigimos al dashboard
-    return res.redirect('/dashboard.html');
+    return res.redirect('/');
 }
 
 // Exportamos todas las funciones
