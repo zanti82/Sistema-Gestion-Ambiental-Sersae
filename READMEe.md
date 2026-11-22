@@ -145,8 +145,8 @@ cp .env.example .env
 Editá el archivo `.env` con tus valores:
 
 ```env
-PORT=3000
-MONGO_URI=mongodb://localhost:27017/sersaeDB
+PORT=port
+MONGO_URI=mongodb:url
 JWT_SECRET=tu_secreto_jwt_aqui_minimo_32_caracteres
 SESSION_SECRET=tu_secreto_session_aqui_minimo_32_caracteres
 NODE_ENV=development
@@ -400,9 +400,9 @@ pm2 startup
 
 ## 👤 Autor
 
-Desarrollado por **SERSAE** — Servicios de Sostenibilidad Ambiental Empresarial
-📞 (+57) 300 8869306
-🔗 [LinkedIn](https://linkedin.com/in/sersae2014)
+Desarrollado por **dev82** — servicios de software empresarial
+📞 (+57) 3216473362
+
 
 ---
 

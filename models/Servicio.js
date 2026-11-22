@@ -22,24 +22,65 @@ const servicioSchema = new mongoose.Schema(
             trim: true,
             default: null
         },
+        linkPropuesta: {
+            type: String,
+            trim: true,
+            default: null
+        },
         precio: {
             type: Number,
             default: 0
         },
-        estado: {
-            type: String,
-            enum: ['cotizado', 'activo', 'finalizado', 'facturado'],
-            default: 'cotizado'
+        descuento: {
+            type: Number,
+            default: 0
         },
-        cliente: {
+        acuerdoPago: {
+            type: String,
+            trim: true,
+            default: null
+        },
+        estadoPropuesta: {
+            type: String,
+            enum: ['pendiente', 'aprobada', 'rechazada'],
+            default: 'pendiente'
+        },
+        motivoRechazo: {
+            type: String,
+            trim: true,
+            default: null
+        },
+        estadoEjecucion: {
+            type: String,
+            enum: ['sin_iniciar', 'en_curso', 'ejecutado', 'pausado'],
+            default: 'sin_iniciar'
+        },
+        
+        sede: {
             type: mongoose.Schema.Types.ObjectId,
-            ref: 'Cliente',
+            ref: 'Sede',
             required: true
+        },
+        // Only for services of tipo 'tramite'. Points to the catalog
+        tipoTramite: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'TipoTramite',
+            default: null,
+            // "required" can be a function. Mongoose runs it when it validates.
+            // "this" is the service being saved
+            required: function() {
+                return this.tipo === 'tramite';
+            }
         },
         creadoPor: {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'User',
             required: true
+        },
+        // Bandera técnica de borrado lógico: false significa "eliminado", sin tocar los estados del negocio
+        activo: {
+            type: Boolean,
+            default: true
         }
     },
     {

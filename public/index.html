@@ -8,7 +8,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 </head>
-<script src="scripts.js"></script>
+
 <body>
 
 <!-- =====================
@@ -30,7 +30,7 @@
         </div>
         <div class="login-feature">
             <div class="login-feature-icono">📋</div>
-            <span class="login-feature-texto">Seguimiento de proyectos por cliente</span>
+            <span class="login-feature-texto">Seguimiento de sedes y servicios por cliente</span>
         </div>
         <div class="login-feature">
             <div class="login-feature-icono">🔒</div>
@@ -93,10 +93,17 @@
                 <span class="nav-icono">🏢</span>
                 Clientes
             </a>
-            <a class="nav-item" onclick="mostrarPagina('proyectos')">
-                <span class="nav-icono">📁</span>
-                Granjas
+
+            <a class="nav-item" onclick="mostrarPagina('servicios')">
+                <span class="nav-icono">🧾</span>
+                Servicios
             </a>
+
+            <a class="nav-item" onclick="mostrarPagina('sedes')">
+                <span class="nav-icono">📍</span>
+                Sedes
+            </a>
+
             <a class="nav-item" onclick="mostrarPagina('permisos')">
                 <span class="nav-icono">📄</span>
                 Permisos
@@ -147,8 +154,8 @@
                     <div class="stat-card">
                         <div class="stat-icono">📁</div>
                         <div>
-                            <div class="stat-numero" id="statProyectos">0</div>
-                            <div class="stat-label">Granjas activos</div>
+                            <div class="stat-numero" id="statSedes">0</div>
+                            <div class="stat-label">Sedes activas</div>
                         </div>
                     </div>
                     <div class="stat-card alerta-amarilla">
@@ -189,40 +196,68 @@
                                 <tr>
                                     <th>Razón Social</th>
                                     <th>NIT</th>
-                                    <th>Email</th>
-                                    <th>Sector</th>
+                                    <th>Contacto</th>
+                                    <th>Teléfono</th>
+                                    <th>Estatus</th>
                                     <th>Acciones</th>
                                 </tr>
                             </thead>
                             <tbody id="tablaClientes">
-                                <tr><td colspan="5"><div class="estado-vacio"><div class="estado-vacio-icono">🏢</div><div class="estado-vacio-texto">Cargando clientes...</div></div></td></tr>
+                                <tr><td colspan="6"><div class="estado-vacio"><div class="estado-vacio-icono">🏢</div><div class="estado-vacio-texto">Cargando clientes...</div></div></td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <!-- SERVICIOS -->
+            <div id="paginaServicios" class="pagina">
+                <div class="seccion-card">
+                    <div class="seccion-header">
+                        <span class="seccion-titulo">🧾 Servicios</span>
+                        <button class="btn btn-primary" onclick="abrirModalServicio()">+ Nuevo servicio</button>
+                    </div>
+                    <div class="tabla-wrapper">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Cliente</th>
+                                    <th>Servicio</th>
+                                    <th>Tipo</th>
+                                    <th>Total</th>
+                                    <th>Propuesta</th>
+                                    <th>Ejecución</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tablaServicios">
+                                <tr><td colspan="7"><div class="estado-vacio"><div class="estado-vacio-icono">🧾</div><div class="estado-vacio-texto">Cargando servicios...</div></div></td></tr>
                             </tbody>
                         </table>
                     </div>
                 </div>
             </div>
 
-            <!-- PROYECTOS -->
-            <div id="paginaProyectos" class="pagina">
+            <!-- SEDES -->
+            <div id="paginaSedes" class="pagina">
                 <div class="seccion-card">
                     <div class="seccion-header">
-                        <span class="seccion-titulo">📁 Granjas</span>
-                        <button class="btn btn-primary" onclick="abrirModalProyecto()">+ Nuevo proyecto</button>
+                        <span class="seccion-titulo">📍 Sedes</span>
+                        <button class="btn btn-primary" onclick="abrirModalSede()">+ Nueva sede</button>
                     </div>
                     <div class="tabla-wrapper">
                         <table>
                             <thead>
                                 <tr>
                                     <th>Código</th>
-                                    <th>Nombre</th>
+                                    <th>Sede</th>
                                     <th>Cliente</th>
-                                    <th>Tipo</th>
-                                    <th>Estado</th>
+                                    <th>Categoría</th>
+                                    <th>Municipio</th>
                                     <th>Acciones</th>
                                 </tr>
                             </thead>
-                            <tbody id="tablaProyectos">
-                                <tr><td colspan="6"><div class="estado-vacio"><div class="estado-vacio-icono">📁</div><div class="estado-vacio-texto">Cargando proyectos...</div></div></td></tr>
+                            <tbody id="tablaSedes">
+                                <tr><td colspan="6"><div class="estado-vacio"><div class="estado-vacio-texto">Cargando sedes...</div></div></td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -234,7 +269,7 @@
                 <div class="seccion-card">
                     <div class="seccion-header">
                         <span class="seccion-titulo">📄 Permisos Ambientales</span>
-                        <button class="btn btn-primary" onclick="abrirModalPermiso()">+ Nuevo permiso</button>
+                        <button class="btn btn-primary" onclick="abrirModalPermiso()">+ Nuevo permiso o plazo</button>
                     </div>
                     <div class="tabla-wrapper">
                         <table>
@@ -242,8 +277,8 @@
                                 <tr>
                                     <th>Número</th>
                                     <th>Nombre</th>
-                                    <th>Proyecto</th>
-                                    <th>Vencimiento</th>
+                                    <th>Servicio</th>
+                                    <th>Fecha</th>
                                     <th>Estado</th>
                                     <th>Acciones</th>
                                 </tr>
@@ -273,7 +308,7 @@
                 </div>
                 <div class="seccion-card">
                     <div class="seccion-header">
-                        <span class="seccion-titulo">⏳ Por Vencer (próximos 30 días)</span>
+                        <span class="seccion-titulo">⏳ Por Vencer </span>
                         <span id="conteoPorVencer" class="badge badge-por-vencer">0</span>
                     </div>
                     <div id="listaPorVencer">
@@ -298,32 +333,42 @@
                         <div class="form-grid">
                             <input type="hidden" id="editarClienteId">
                             <div class="form-group full-width">
-                                <label>Razón Social</label>
+                                <label>Nombre del predio o razón social</label>
                                 <input type="text" id="editarClienteRazonSocial">
+                            </div>
+                            <div class="form-group">
+                                <label>NIT o cédula (no editable)</label>
+                                <input type="text" id="editarClienteNit" readonly>
+                            </div>
+                            <div class="form-group">
+                                <label>Nombre completo del contacto</label>
+                                <input type="text" id="editarClienteNombreCompleto">
                             </div>
                             <div class="form-group">
                                 <label>Email</label>
                                 <input type="email" id="editarClienteEmail">
                             </div>
                             <div class="form-group">
+                                <label>Email 2 (opcional)</label>
+                                <input type="email" id="editarClienteEmail2">
+                            </div>
+                            <div class="form-group">
                                 <label>Teléfono</label>
                                 <input type="text" id="editarClienteTelefono">
                             </div>
                             <div class="form-group">
-                                <label>Sector</label>
-                                <select id="editarClienteSector">
-                                    <option value="mineria">Minería</option>
-                                    <option value="agricultura">Agricultura</option>
-                                    <option value="industria">Industria</option>
-                                    <option value="construccion">Construcción</option>
-                                    <option value="energia">Energía</option>
-                                    <option value="otro">Otro</option>
+                                <label>Teléfono 2 (opcional)</label>
+                                <input type="text" id="editarClienteTelefono2">
+                            </div>
+                            <div class="form-group">
+                                <label>Estatus</label>
+                                <select id="editarClienteEstatus">
+                                    <option value="potencial">Potencial</option>
+                                    <option value="consolidado">Consolidado</option>
+                                    <option value="inactivo">Inactivo</option>
                                 </select>
                             </div>
-                            <div class="form-group full-width">
-                                <label>Dirección</label>
-                                <input type="text" id="editarClienteDireccion">
-                            </div>
+                            
                         </div>
                         <div class="modal-footer" style="padding: 24px 0 0 0;">
                             <button class="btn btn-secondary" onclick="mostrarPagina('clientes')">Cancelar</button>
@@ -333,56 +378,147 @@
                 </div>
             </div>
 
-            <!-- EDITAR PROYECTO -->
-            <div id="paginaEditarProyecto" class="pagina">
+            <!-- EDITAR SERVICIO -->
+            <div id="paginaEditarServicio" class="pagina">
                 <div class="seccion-card">
                     <div class="seccion-header">
-                        <span class="seccion-titulo">✏️ Editar Proyecto</span>
-                        <button class="btn btn-secondary" onclick="mostrarPagina('proyectos')">← Volver</button>
+                        <span class="seccion-titulo">✏️ Editar Servicio</span>
+                        <button class="btn btn-secondary" onclick="mostrarPagina('servicios')">← Volver</button>
                     </div>
                     <div class="modal-body">
-                        <div id="editarProyectoError" class="mensaje-error"></div>
-                        <div id="editarProyectoExito" class="mensaje-exito"></div>
+                        <div id="editarServicioError" class="mensaje-error"></div>
+                        <div id="editarServicioExito" class="mensaje-exito"></div>
                         <div class="form-grid">
-                            <input type="hidden" id="editarProyectoId">
-                            <div class="form-group full-width">
-                                <label>Nombre del proyecto</label>
-                                <input type="text" id="editarProyectoNombre">
+                            <input type="hidden" id="editarServicioId">
+                            <div class="form-group">
+                                <label>Cliente (no editable)</label>
+                                <input type="text" id="editarServicioCliente" readonly>
                             </div>
                             <div class="form-group">
-                                <label>Tipo de proyecto</label>
-                                <select id="editarProyectoTipo">
-                                    <option value="estudio_impacto">Estudio de Impacto</option>
-                                    <option value="plan_manejo">Plan de Manejo</option>
-                                    <option value="auditoria">Auditoría</option>
-                                    <option value="monitoreo">Monitoreo</option>
+                                <label>Tipo de servicio (no editable)</label>
+                                <input type="text" id="editarServicioTipo" readonly>
+                            </div>
+                            <div class="form-group full-width">
+                                <label>Nombre del servicio</label>
+                                <input type="text" id="editarServicioNombre">
+                            </div>
+                            <div class="form-group full-width">
+                                <label>Descripción (opcional)</label>
+                                <textarea id="editarServicioDescripcion" rows="2"></textarea>
+                            </div>
+                            <div class="form-group full-width">
+                                <label>Link de la propuesta (opcional)</label>
+                                <input type="text" id="editarServicioLink">
+                            </div>
+                            <div class="form-group">
+                                <label>Precio (COP)</label>
+                                <input type="number" id="editarServicioPrecio" min="0" step="1">
+                            </div>
+                            <div class="form-group">
+                                <label>Descuento (COP)</label>
+                                <input type="number" id="editarServicioDescuento" min="0" step="1">
+                            </div>
+                            <div class="form-group full-width">
+                                <label>Acuerdo de pago (opcional)</label>
+                                <textarea id="editarServicioAcuerdoPago" rows="2"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label>Estado de la propuesta</label>
+                                <select id="editarServicioEstadoPropuesta" onchange="alternarMotivoRechazoEditar()">
+                                    <option value="pendiente">Pendiente</option>
+                                    <option value="aprobada">Aprobada</option>
+                                    <option value="rechazada">Rechazada</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Estado de ejecución</label>
+                                <select id="editarServicioEstadoEjecucion">
+                                    <option value="sin_iniciar">Sin iniciar</option>
+                                    <option value="en_curso">En curso</option>
+                                    <option value="ejecutado">Ejecutado</option>
+                                    <option value="pausado">Pausado</option>
+                                </select>
+                            </div>
+                            <div class="form-group full-width" id="editarGrupoMotivoRechazo" style="display:none;">
+                                <label>Motivo del rechazo</label>
+                                <input type="text" id="editarServicioMotivoRechazo">
+                            </div>
+                        </div>
+                        <div class="modal-footer" style="padding: 24px 0 0 0;">
+                            <button class="btn btn-secondary" onclick="mostrarPagina('servicios')">Cancelar</button>
+                            <button class="btn btn-primary" onclick="actualizarServicio()">Guardar cambios</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- EDITAR SEDE -->
+            <div id="paginaEditarSede" class="pagina">
+                <div class="seccion-card">
+                    <div class="seccion-header">
+                        <span class="seccion-titulo">✏️ Editar Sede</span>
+                        <button class="btn btn-secondary" onclick="mostrarPagina('sedes')">← Volver</button>
+                    </div>
+                    <div class="modal-body">
+                        <div id="editarSedeError" class="mensaje-error"></div>
+                        <div id="editarSedeExito" class="mensaje-exito"></div>
+                        <div class="form-grid">
+                            <input type="hidden" id="editarSedeId">
+                            <div class="form-group">
+                                <label>Código (no editable)</label>
+                                <input type="text" id="editarSedeCodigo" readonly>
+                            </div>
+                            <div class="form-group">
+                                <label>Cliente y sede (no editable)</label>
+                                <input type="text" id="editarSedeCliente" readonly>
+                            </div>
+                            <div class="form-group">
+                                <label>Nombre de la sede</label>
+                                <input type="text" id="editarSedeNombre">
+                            </div>
+                            <div class="form-group">
+                                <label>Categoría</label>
+                                <select id="editarSedeCategoria">
+                                    <option value="porcicultor">Porcicultor</option>
+                                    <option value="avicultor">Avicultor</option>
+                                    <option value="agricultor">Agricultor</option>
+                                    <option value="ganadero">Ganadero</option>
+                                    <option value="industria">Industria</option>
                                     <option value="otro">Otro</option>
                                 </select>
                             </div>
                             <div class="form-group">
-                                <label>Estado</label>
-                                <select id="editarProyectoEstado">
-                                    <option value="activo">Activo</option>
-                                    <option value="suspendido">Suspendido</option>
-                                    <option value="finalizado">Finalizado</option>
-                                </select>
+                                <label>Departamento</label>
+                                <input type="text" id="editarSedeDepartamento">
                             </div>
                             <div class="form-group">
-                                <label>Fecha de inicio</label>
-                                <input type="date" id="editarProyectoFechaInicio">
+                                <label>Municipio</label>
+                                <input type="text" id="editarSedeMunicipio">
                             </div>
                             <div class="form-group">
-                                <label>Fecha de fin</label>
-                                <input type="date" id="editarProyectoFechaFin">
+                                <label>Vereda</label>
+                                <input type="text" id="editarSedeVereda">
                             </div>
-                            <div class="form-group full-width">
-                                <label>Descripción</label>
-                                <input type="text" id="editarProyectoDescripcion">
+                            <div class="form-group">
+                                <label>Autoridad ambiental</label>
+                                <input type="text" id="editarSedeAutoridad">
+                            </div>
+                            <div class="form-group">
+                                <label>Coordenada X</label>
+                                <input type="text" id="editarSedeCoordX">
+                            </div>
+                            <div class="form-group">
+                                <label>Coordenada Y</label>
+                                <input type="text" id="editarSedeCoordY">
+                            </div>
+                            <div class="form-group">
+                                <label>Coordenada Z (altitud)</label>
+                                <input type="text" id="editarSedeCoordZ">
                             </div>
                         </div>
                         <div class="modal-footer" style="padding: 24px 0 0 0;">
-                            <button class="btn btn-secondary" onclick="mostrarPagina('proyectos')">Cancelar</button>
-                            <button class="btn btn-primary" onclick="actualizarProyecto()">Guardar cambios</button>
+                            <button class="btn btn-secondary" onclick="mostrarPagina('sedes')">Cancelar</button>
+                            <button class="btn btn-primary" onclick="actualizarSede()">Guardar cambios</button>
                         </div>
                     </div>
                 </div>
@@ -400,32 +536,25 @@
                         <div id="editarPermisoExito" class="mensaje-exito"></div>
                         <div class="form-grid">
                             <input type="hidden" id="editarPermisoId">
+                            <input type="hidden" id="editarPermisoTipoFecha">
                             <div class="form-group full-width">
-                                <label>Nombre del permiso</label>
+                                <label>Servicio (no editable)</label>
+                                <input type="text" id="editarPermisoServicio" readonly>
+                            </div>
+                            <div class="form-group full-width">
+                                <label>Nombre</label>
                                 <input type="text" id="editarPermisoNombre">
                             </div>
-                            <div class="form-group">
-                                <label>Tipo de permiso</label>
-                                <select id="editarPermisoTipo">
-                                    <option value="licencia_ambiental">Licencia Ambiental</option>
-                                    <option value="permiso_vertimiento">Permiso de Vertimiento</option>
-                                    <option value="permiso_emision">Permiso de Emisión</option>
-                                    <option value="concesion_agua">Concesión de Agua</option>
-                                    <option value="permiso_aprovechamiento">Permiso de Aprovechamiento</option>
-                                    <option value="otro">Otro</option>
-                                </select>
+                            <div class="form-group" id="editarGrupoPermisoNumero" style="display:none;">
+                                <label>Número oficial</label>
+                                <input type="text" id="editarPermisoNumero">
+                            </div>
+                            <div class="form-group" id="editarGrupoPermisoEmision" style="display:none;">
+                                <label>Fecha de emisión</label>
+                                <input type="date" id="editarPermisoFechaEmision">
                             </div>
                             <div class="form-group">
-                                <label>Estado</label>
-                                <select id="editarPermisoEstado">
-                                    <option value="vigente">Vigente</option>
-                                    <option value="por_vencer">Por vencer</option>
-                                    <option value="vencido">Vencido</option>
-                                    <option value="renovado">Renovado</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label>Fecha de vencimiento</label>
+                                <label id="editarEtiquetaPermisoFecha">Fecha de vencimiento</label>
                                 <input type="date" id="editarPermisoFechaVencimiento">
                             </div>
                             <div class="form-group">
@@ -435,6 +564,11 @@
                             <div class="form-group full-width">
                                 <label>Observaciones</label>
                                 <input type="text" id="editarPermisoObservaciones">
+                            </div>
+                            <div class="form-group full-width">
+                                <label>
+                                    <input type="checkbox" id="editarPermisoRenovado" style="width:auto; padding:0; border:none;"> Marcar como renovado
+                                </label>
                             </div>
                         </div>
                         <div class="modal-footer" style="padding: 24px 0 0 0;">
@@ -462,37 +596,42 @@
             <div id="clienteError" class="mensaje-error"></div>
             <div class="form-grid">
                 <div class="form-group full-width">
-                    <label>Razón Social</label>
-                    <input type="text" id="clienteRazonSocial" placeholder="Nombre legal de la empresa">
+                    <label>Nombre del predio o razón social</label>
+                    <input type="text" id="clienteRazonSocial" placeholder="Los Alpes">
                 </div>
                 <div class="form-group">
-                    <label>NIT</label>
+                    <label>NIT o cédula</label>
                     <input type="text" id="clienteNit" placeholder="900123456-1">
                 </div>
                 <div class="form-group">
+                    <label>Nombre completo del contacto</label>
+                    <input type="text" id="clienteNombreCompleto" placeholder="Jhon Dario Correa">
+                </div>
+                <div class="form-group">
                     <label>Email</label>
-                    <input type="email" id="clienteEmail" placeholder="contacto@empresa.com">
+                    <input type="email" id="clienteEmail" placeholder="contacto@correo.com">
+                </div>
+                <div class="form-group">
+                    <label>Email 2 (opcional)</label>
+                    <input type="email" id="clienteEmail2">
                 </div>
                 <div class="form-group">
                     <label>Teléfono</label>
-                    <input type="text" id="clienteTelefono" placeholder="3001234567">
+                    <input type="text" id="clienteTelefono">
                 </div>
                 <div class="form-group">
-                    <label>Sector</label>
-                    <select id="clienteSector">
-                        <option value="otro">Seleccioná un sector</option>
-                        <option value="mineria">Minería</option>
-                        <option value="agricultura">Agricultura</option>
-                        <option value="industria">Industria</option>
-                        <option value="construccion">Construcción</option>
-                        <option value="energia">Energía</option>
-                        <option value="otro">Otro</option>
+                    <label>Teléfono 2 (opcional)</label>
+                    <input type="text" id="clienteTelefono2">
+                </div>
+                <div class="form-group">
+                    <label>Estatus</label>
+                    <select id="clienteEstatus">
+                        <option value="potencial">Potencial</option>
+                        <option value="consolidado">Consolidado</option>
+                        <option value="inactivo">Inactivo</option>
                     </select>
                 </div>
-                <div class="form-group full-width">
-                    <label>Dirección</label>
-                    <input type="text" id="clienteDireccion" placeholder="Dirección de la empresa">
-                </div>
+                
             </div>
         </div>
         <div class="modal-footer">
@@ -503,55 +642,74 @@
 </div>
 
 <!-- =====================
-     MODAL PROYECTO
-     ===================== -->
-<div id="modalProyecto" class="modal-overlay">
+MODAL sede
+===================== -->
+<div id="modalSede" class="modal-overlay">
     <div class="modal">
         <div class="modal-header">
-            <span class="modal-titulo">Nuevo Proyecto</span>
-            <button class="modal-cerrar" onclick="cerrarModal('modalProyecto')">×</button>
+            <span class="modal-titulo">Nueva Sede</span>
+            <button class="modal-cerrar" onclick="cerrarModal('modalSede')">×</button>
         </div>
         <div class="modal-body">
-            <div id="proyectoError" class="mensaje-error"></div>
+            <div id="sedeError" class="mensaje-error"></div>
             <div class="form-grid">
                 <div class="form-group full-width">
-                    <label>Nombre del proyecto</label>
-                    <input type="text" id="proyectoNombre" placeholder="Nombre descriptivo del proyecto">
-                </div>
-                <div class="form-group full-width">
                     <label>Cliente</label>
-                    <select id="proyectoCliente">
+                    <select id="sedeCliente">
                         <option value="">Seleccioná un cliente</option>
                     </select>
                 </div>
                 <div class="form-group">
-                    <label>Tipo de proyecto</label>
-                    <select id="proyectoTipo">
-                        <option value="otro">Seleccioná un tipo</option>
-                        <option value="estudio_impacto">Estudio de Impacto</option>
-                        <option value="plan_manejo">Plan de Manejo</option>
-                        <option value="auditoria">Auditoría</option>
-                        <option value="monitoreo">Monitoreo</option>
+                    <label>Nombre de la sede</label>
+                    <input type="text" id="sedeNombre" placeholder="Granja Los Alpes">
+                </div>
+                <div class="form-group">
+                    <label>Categoría</label>
+                    <select id="sedeCategoria">
+                        <option value="porcicultor">Porcicultor</option>
+                        <option value="avicultor">Avicultor</option>
+                        <option value="agricultor">Agricultor</option>
+                        <option value="ganadero">Ganadero</option>
+                        <option value="industria">Industria</option>
                         <option value="otro">Otro</option>
                     </select>
                 </div>
                 <div class="form-group">
-                    <label>Fecha de inicio</label>
-                    <input type="date" id="proyectoFechaInicio">
+                    <label>Departamento</label>
+                    <input type="text" id="sedeDepartamento">
                 </div>
-                <div class="form-group full-width">
-                    <label>Descripción</label>
-                    <input type="text" id="proyectoDescripcion" placeholder="Descripción breve del proyecto">
+                <div class="form-group">
+                    <label>Municipio</label>
+                    <input type="text" id="sedeMunicipio">
+                </div>
+                <div class="form-group">
+                    <label>Vereda</label>
+                    <input type="text" id="sedeVereda">
+                </div>
+                <div class="form-group">
+                    <label>Autoridad ambiental</label>
+                    <input type="text" id="sedeAutoridad" placeholder="Cornare">
+                </div>
+                <div class="form-group">
+                    <label>Coordenada X</label>
+                    <input type="text" id="sedeCoordX">
+                </div>
+                <div class="form-group">
+                    <label>Coordenada Y</label>
+                    <input type="text" id="sedeCoordY">
+                </div>
+                <div class="form-group">
+                    <label>Coordenada Z (altitud)</label>
+                    <input type="text" id="sedeCoordZ">
                 </div>
             </div>
         </div>
         <div class="modal-footer">
-            <button class="btn btn-secondary" onclick="cerrarModal('modalProyecto')">Cancelar</button>
-            <button class="btn btn-primary" onclick="guardarProyecto()">Guardar proyecto</button>
+            <button class="btn btn-secondary" onclick="cerrarModal('modalSede')">Cancelar</button>
+            <button class="btn btn-primary" onclick="guardarSede()">Guardar sede</button>
         </div>
     </div>
 </div>
-
 <!-- =====================
      MODAL PERMISO
      ===================== -->
@@ -565,37 +723,25 @@
             <div id="permisoError" class="mensaje-error"></div>
             <div class="form-grid">
                 <div class="form-group full-width">
-                    <label>Nombre del permiso</label>
-                    <input type="text" id="permisoNombre" placeholder="Nombre descriptivo del permiso">
+                    <label>Servicio (trámite)</label>
+                    <select id="permisoServicio" onchange="alternarCamposPermiso()">
+                        <option value="">Seleccioná un servicio</option>
+                    </select>
                 </div>
-                <div class="form-group">
+                <div class="form-group full-width">
+                    <label>Nombre</label>
+                    <input type="text" id="permisoNombre">
+                </div>
+                <div class="form-group" id="grupoPermisoNumero" style="display:none;">
                     <label>Número oficial</label>
-                    <input type="text" id="permisoNumero" placeholder="LA-2024-001">
+                    <input type="text" id="permisoNumero" placeholder="RES-2026-001">
                 </div>
-                <div class="form-group">
-                    <label>Tipo de permiso</label>
-                    <select id="permisoTipo">
-                        <option value="otro">Seleccioná un tipo</option>
-                        <option value="licencia_ambiental">Licencia Ambiental</option>
-                        <option value="permiso_vertimiento">Permiso de Vertimiento</option>
-                        <option value="permiso_emision">Permiso de Emisión</option>
-                        <option value="concesion_agua">Concesión de Agua</option>
-                        <option value="permiso_aprovechamiento">Permiso de Aprovechamiento</option>
-                        <option value="otro">Otro</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Proyecto</label>
-                    <select id="permisoProyecto">
-                        <option value="">Seleccioná un proyecto</option>
-                    </select>
-                </div>
-                <div class="form-group">
+                <div class="form-group" id="grupoPermisoEmision" style="display:none;">
                     <label>Fecha de emisión</label>
                     <input type="date" id="permisoFechaEmision">
                 </div>
                 <div class="form-group">
-                    <label>Fecha de vencimiento</label>
+                    <label id="etiquetaPermisoFecha">Fecha de vencimiento</label>
                     <input type="date" id="permisoFechaVencimiento">
                 </div>
                 <div class="form-group">
@@ -604,7 +750,7 @@
                 </div>
                 <div class="form-group full-width">
                     <label>Observaciones</label>
-                    <input type="text" id="permisoObservaciones" placeholder="Notas adicionales (opcional)">
+                    <input type="text" id="permisoObservaciones">
                 </div>
             </div>
         </div>
@@ -615,5 +761,94 @@
     </div>
 </div>
 
+<!-- =====================
+    MODAL SERVICIO
+    ===================== -->
+    <div id="modalServicio" class="modal-overlay">
+    <div class="modal">
+        <div class="modal-header">
+            <span class="modal-titulo">Nuevo Servicio</span>
+            <button class="modal-cerrar" onclick="cerrarModal('modalServicio')">×</button>
+        </div>
+        <div class="modal-body">
+            <div id="servicioError" class="mensaje-error"></div>
+            <div class="form-grid">
+                <div class="form-group full-width">
+                    <label>Sede</label>
+                    <select id="servicioSede">
+                        <option value="">Seleccioná una sede</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Tipo de servicio</label>
+                    <select id="servicioTipo" onchange="alternarTipoTramite()">
+                        <option value="">Seleccioná un tipo</option>
+                        <option value="diagnostico">Diagnóstico</option>
+                        <option value="tramite">Trámite</option>
+                        <option value="sostenibilidad">Sostenibilidad</option>
+                        <option value="accion_climatica">Acción climática</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Nombre del servicio</label>
+                    <input type="text" id="servicioNombre" placeholder="Concesión de aguas">
+                </div>
+                <div class="form-group full-width" id="grupoTipoTramite" style="display:none;">
+                    <label>Tipo de trámite</label>
+                    <select id="servicioTipoTramite">
+                        <option value="">Seleccioná un trámite</option>
+                    </select>
+                </div>
+                <div class="form-group full-width">
+                    <label>Descripción (opcional)</label>
+                    <textarea id="servicioDescripcion" rows="2"></textarea>
+                </div>
+                <div class="form-group full-width">
+                    <label>Link de la propuesta (opcional)</label>
+                    <input type="text" id="servicioLink" placeholder="Enlace al documento de la propuesta">
+                </div>
+                <div class="form-group">
+                    <label>Precio (COP)</label>
+                    <input type="number" id="servicioPrecio" min="0" step="1">
+                </div>
+                <div class="form-group">
+                    <label>Descuento (COP)</label>
+                    <input type="number" id="servicioDescuento" min="0" step="1">
+                </div>
+                <div class="form-group full-width">
+                    <label>Acuerdo de pago (opcional)</label>
+                    <textarea id="servicioAcuerdoPago" rows="2"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Estado de la propuesta</label>
+                    <select id="servicioEstadoPropuesta" onchange="alternarMotivoRechazo()">
+                        <option value="pendiente">Pendiente</option>
+                        <option value="aprobada">Aprobada</option>
+                        <option value="rechazada">Rechazada</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Estado de ejecución</label>
+                    <select id="servicioEstadoEjecucion">
+                        <option value="sin_iniciar">Sin iniciar</option>
+                        <option value="en_curso">En curso</option>
+                        <option value="ejecutado">Ejecutado</option>
+                        <option value="pausado">Pausado</option>
+                    </select>
+                </div>
+                <!-- Este grupo arranca oculto y solo aparece si la propuesta es rechazada -->
+                <div class="form-group full-width" id="grupoMotivoRechazo" style="display:none;">
+                    <label>Motivo del rechazo</label>
+                    <input type="text" id="servicioMotivoRechazo">
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" onclick="cerrarModal('modalServicio')">Cancelar</button>
+            <button class="btn btn-primary" onclick="guardarServicio()">Guardar servicio</button>
+        </div>
+    </div>
+</div>
+<script src="scripts.js"></script>
 </body>
 </html>

@@ -18,8 +18,8 @@ router.post('/register', authController.register);
 router.post('/login', authController.login);
 
 // Logout
-// GET /api/auth/logout
-router.get('/logout', authController.logout);
+// POST /api/auth/logout
+router.post('/logout', authController.logout);
 
 
 // RUTAS GITHUB OAUTH
